@@ -13,8 +13,10 @@ import scipy
 
 #Data lecture
 #Geopackage & Raster
-vec= gpd.read_file(r"/home/duiliof/Desktop/BH/input/Inventario/Bandas/bandas_50m_18S_fid.gpkg")
-data= rs.open(r"/home/duiliof/Desktop/BH/BALANCE_GEODESICO/hugonnet/dhdt_hugonnet_chile_18s_32718_fix.tif")
+vec= gpd.read_file(r"/home/duiliof/Desktop/BH/input/Inventario/Bandas/bandas_50m_inventario_prueba_fill.gpkg")
+vec2=vec.copy() #Copy of original shapefile
+vec2=vec2.to_crs({'init':'epsg:32718'}) #Change CRS of shapefile copy
+data= rs.open(r"/home/duiliof/Desktop/BH/BALANCE_GEODESICO/hugonnet/dhdt_hugonnet_chile_32b_nullzero.tif") #loading Raster
 iden= [] # Id list
 poly= [] # Numpy matrix list
 nmad_bb= [] # Normalized Median Absolute Deviation list
@@ -22,13 +24,14 @@ area_pol=[] # Polygon's surface
 #Custom Attributes
 cod_gla= []#Lista de Codigos glaciar
 dhdt=[]
+dhdt_mean_ac=[]
 #Raster Mask
 print("BLOCK 1: START")
 for i in range(vec["geometry"].shape[0]): 
     iout, _ = mask(data, vec.geometry[i], invert=False,crop=True)
     
     #Polygon Surface
-    area_pol=vec.geometry[i].area
+    area_pol=vec2.geometry[i].area
    
     #pointer
     rs_mask=np.array(iout)
@@ -44,9 +47,10 @@ for i in range(vec["geometry"].shape[0]):
     
     #Data Filtering
     values_mask = values_mask[(values_mask <= nmad*3) & (values_mask >= nmad*(-3))]
-    #print(values_mask)   
+    #print(values_mask)   s_32719_fix.tif
     #Clear 
     dhdt_pnd=(np.nanmean(values_mask)*area_pol/(vec["AREA_Km2"][i]*(10**6)))
+    dhdt_mean=(np.nanmean(values_mask))
     #print(dhdt_pnd)
     #Saving Vectors
     poly.append(iout)
@@ -54,11 +58,13 @@ for i in range(vec["geometry"].shape[0]):
     cod_gla.append(vec["COD_GLA"][i])
     nmad_bb.append(nmad)
     dhdt.append(dhdt_pnd)
+    dhdt_mean_ac.append(dhdt_mean)
     clear_output(wait=True)
     print(str(i)+" de "+str(range(vec["geometry"].shape[0])))          
 # Add vector to geopackage field
-#vec["dhdt_pnd"]=dhdt
-#vec.to_file("dhdt_mocho_bandas50m.gpkg", driver="GPKG")
+vec["dhdt_pnd_bnd"]=dhdt
+vec["dhdt_mean_bnd"]=dhdt_mean_ac
+vec.to_file("dhdt_prueba_hugonnet_bandas50m_fill.gpkg", driver="GPKG")
 print("BLOCK 1: DONE")
 #Results
 result_multicode=pd.DataFrame(data=cod_gla,index=iden,columns=['COD_GLA'])
@@ -75,4 +81,4 @@ print("BLOCK 2: DONE")
 # Output
 output=pd.DataFrame(data=cod_gla_clean,index=cod_gla_clean,columns=['COD_GLA'])   
 output.insert(1, "dhdt", dhdt_per_glacod, allow_duplicates=True)
-output.to_csv('dhdt_18S.csv', index=False, encoding='utf-8')
+output.to_csv('dhdt_hugonnet_pruebas_fill.csv', index=False, encoding='utf-8')
