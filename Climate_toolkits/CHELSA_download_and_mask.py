@@ -13,10 +13,11 @@ def chelsa_mask(txt_path,output_path,gpkg_mask_path):
     gpkg_mask_path=r"C://Users//Administrador//Desktop//climate_permafrost//mask//chile_mask_wgs84.gpkg"
 
     chelsa_mask(txt_path,output_path,gpkg_mask_path)
-    
-    
+  
     Requisites:
-    wget
+    wget-subprocess-rasterio-fiona
+    
+    tested in Windows
     """
     import os
     import subprocess
