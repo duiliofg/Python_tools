@@ -11,5 +11,8 @@ Python function designed to download and mask <a href="https://chelsa-climate.or
   <a>
     <img src="https://img.shields.io/badge/dependencies-Fiona-green" alt="repo1"/>
   </a>
+   <a>
+    <img src="https://img.shields.io/badge/dependencies-WGET-green" alt="repo1"/>
+  </a>
   </div>
   
